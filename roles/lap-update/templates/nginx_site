@@ -1,0 +1,58 @@
+server { # lap
+    listen 0.0.0.0;
+
+    server_name {{ server_name }};
+    
+    root {{ site_root_dir }};
+
+    access_log {{ log_dir }}/access.log;
+    error_log  {{ log_dir }}/error.log;
+
+    location / {
+        index   index.html index.php;
+        try_files $uri $uri/ /index.php?$args;
+        
+        #!!!
+        autoindex on;
+        autoindex_exact_size off;
+        autoindex_localtime on;
+    }
+    
+    location = /admin.php {
+        fastcgi_split_path_info ^(.+\.php)(.*)$;
+        #let yii catch the calls to unexising PHP files
+        set $fsn /index.php;
+        if (-f $document_root$fastcgi_script_name){
+            set $fsn $fastcgi_script_name;
+        }
+        fastcgi_pass    127.0.0.1:9000;
+        include fastcgi_params;
+        fastcgi_param   SCRIPT_FILENAME $document_root$fsn;
+        #PATH_INFO and PATH_TRANSLATED can be omitted, but RFC 3875 specifies them for CGI
+        fastcgi_param   PATH_INFO       $fastcgi_path_info;
+        fastcgi_param   PATH_TRANSLATED $document_root$fsn;
+    }
+
+    location ~ ^/(protected|framework|themes/\w+/views) {
+        deny   all;
+    }
+
+    location ~ \.(js|css|png|jpg|gif|swf|ico|pdf|mov|fla|zip|rar)$ {
+        try_files $uri =404;
+    }
+
+    location ~* \.php {
+        fastcgi_split_path_info ^(.+\.php)(.*)$;
+        #let yii catch the calls to unexising PHP files
+        set $fsn /index.php;
+        if (-f $document_root$fastcgi_script_name){
+            set $fsn $fastcgi_script_name;
+        }
+        fastcgi_pass    127.0.0.1:9000;
+        include fastcgi_params;
+        fastcgi_param   SCRIPT_FILENAME $document_root$fsn;
+        #PATH_INFO and PATH_TRANSLATED can be omitted, but RFC 3875 specifies them for CGI
+        fastcgi_param   PATH_INFO       $fastcgi_path_info;
+        fastcgi_param   PATH_TRANSLATED $document_root$fsn;
+    }
+}

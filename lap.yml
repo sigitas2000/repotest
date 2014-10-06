@@ -1,0 +1,63 @@
+---
+- name: all useful tags
+  hosts: all
+  gather_facts: no
+  tasks:
+    - include: tasks/tags.yml tags=list
+
+
+- name: pkg-update
+  hosts: all
+  gather_facts: no
+  sudo: true
+  roles:
+    - { role: lap-pkg-update, tags: ['lap-pkg-update'] }
+
+
+- name: lap-download
+  hosts: all
+  gather_facts: no
+  sudo: true
+  vars:
+    download_dir : /var/www/lap/src                            # /full/path/to/remote/dir
+    token        : 22bf7fd53c21087ec1b6e4d5144448c53481a222    # Authorization token, change it if required
+  roles:
+    - { role: lap-download, tags: ['lap-download'] }
+
+
+- name: lap-master-update
+  hosts: all
+  gather_facts: no
+  sudo: true
+  vars:
+    server_name     : master.lap.local
+    nginx_root_dir  : /var/www
+    project_dir     : /var/www/lap/master
+    project_dir_tmp : /var/www/lap/master_tmp
+    site_root_dir   : /var/www/lap/master/www
+    yii_dir         : /var/www/lap/yii
+    download_dir    : /var/www/lap/src
+    log_dir         : /var/www/lap/log
+    tmp_dir         : /var/www/lap/tmp
+    extract_file    : tar -xvf {{ download_dir }}/lap-master.tar.gz -C {{ project_dir_tmp }} --strip 1
+  roles:
+    - { role: lap-update, tags: ['lap-master-update'] }
+
+
+- name: lap-dev-update
+  hosts: all
+  gather_facts: no
+  sudo: true
+  vars:
+    server_name     : dev.lap.local
+    nginx_root_dir  : /var/www
+    project_dir     : /var/www/lap/dev
+    project_dir_tmp : /var/www/lap/dev_tmp
+    site_root_dir   : /var/www/lap/dev/www
+    yii_dir         : /var/www/lap/yii
+    download_dir    : /var/www/lap/src
+    log_dir         : /var/www/lap/log
+    tmp_dir         : /var/www/lap/tmp
+    extract_file    : tar -xvf {{ download_dir }}/lap-development.tar.gz -C {{ project_dir_tmp }} --strip 1
+  roles:
+    - { role: lap-update, tags: ['lap-dev-update'] }

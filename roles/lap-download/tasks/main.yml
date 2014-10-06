@@ -1,0 +1,14 @@
+- name: Create src directory
+  shell: mkdir -p {{ download_dir }}
+
+- name: Download Yii framework
+  shell: "wget -O {{ download_dir }}/yii.tar.gz https://api.github.com/repos/yiisoft/yii/tarball/master"
+
+- name: Download Adminer
+  shell: "wget -O {{ download_dir }}/adminer.php http://sourceforge.net/projects/adminer/files/latest/download?source=files"
+
+- name: Download LAP master branch
+  shell: "wget -O {{ download_dir }}/lap-master.tar.gz       --header='Authorization: token {{ token }}' https://api.github.com/repos/kupishoes/leos.lap/tarball/master"
+
+- name: Download LAP development branch
+  shell: "wget -O {{ download_dir }}/lap-development.tar.gz --header='Authorization: token {{ token }}' https://api.github.com/repos/kupishoes/leos.lap/tarball/development"

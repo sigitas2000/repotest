@@ -1,0 +1,17 @@
+- name: Mysql service stop
+  shell: service mysql stop
+
+- name: Change Mysql root password
+  shell: echo "update mysql.user set password=password('{{ db_pass }}') where user='{{ db_user }}';\n flush privileges;\n" > /tmp/mysql_reset.sql
+
+- name: Mysql service start in safe mode
+  shell: su - mysql -s /bin/bash -c "mysqld_safe --skip-grant-tables --init-file=/tmp/mysql_reset.sql >/dev/null 2>&1 &"
+
+- name: Mysql service stop
+  shell: service mysql stop
+
+- name: Mysql service start
+  shell: service mysql start
+
+- name: Remove temp file
+  shell: rm /tmp/mysql_reset.sql

@@ -1,0 +1,141 @@
+# Create Temporary Directory
+###########################################################
+- name: Create {{ nginx_root_dir }} directory
+  shell: mkdir -p {{ nginx_root_dir }}
+
+- name: Create attach directory
+  shell: mkdir -p {{ tmp_dir }}/attach
+
+- name: Create banner directory
+  shell: mkdir -p {{ tmp_dir }}/banner
+
+- name: Create csv directory
+  shell: mkdir -p {{ tmp_dir }}/csv
+
+- name: Create offer directory
+  shell: mkdir -p {{ tmp_dir }}/offer
+
+- name: Create pdf directory
+  shell: mkdir -p {{ tmp_dir }}/pdf
+
+- name: Create xml directory
+  shell: mkdir -p {{ tmp_dir }}/xml
+
+
+
+
+# Copy Configuration Files
+###########################################################
+- name: Remove temporary directory
+  shell: rm -Rf {{ project_dir_tmp }}
+
+- name: Create {{ project_dir_tmp }} directory
+  shell: mkdir -p {{ project_dir_tmp }}
+
+- name: Extract file
+  shell: "{{ extract_file }}"
+
+- name: Create assets directory
+  shell: mkdir -p {{ project_dir_tmp }}/www/assets
+
+- name: Copy config.ini
+  template: src=config.ini dest={{ project_dir_tmp }}/config
+
+- name: local_config.php
+  template: src=local_config.php dest={{ project_dir_tmp }}/www
+
+- name: Copy admin.php
+  template: src=admin.php dest={{ project_dir_tmp }}/www
+
+- name: Copy index.php
+  template: src=index.php dest={{ project_dir_tmp }}/www
+
+
+
+
+# Install Yii Framework
+###########################################################
+- name: Remove Yii framework directory
+  shell: rm -Rf {{ yii_dir }}
+
+- name: Create Yii framework directory
+  shell: mkdir -p {{ yii_dir }}
+
+- name: Extract Yii framework
+  shell: tar -xvf {{ download_dir }}/yii.tar.gz -C {{ yii_dir }} --strip 1
+
+
+
+
+# Rebuild Project
+###########################################################
+- name: Remove old project directory
+  shell: rm -Rf {{ project_dir }}
+
+- name: Check if path exists
+  stat: path={{ project_dir_tmp }}
+  register: check_path
+
+- name: Rename directory
+  shell: mv {{ project_dir_tmp }} {{ project_dir }}
+  when: check_path.stat.exists
+
+- name: Change directory owner
+  shell: chown -R www-data:www-data {{ project_dir }}
+
+- name: Rebuild project
+  shell: cd {{ project_dir }}/build && su -c phing www-data
+
+- name: Run project migrations
+  shell: cd {{ project_dir }}/protected && php yiic.php migrate --interactive=0
+
+
+
+
+# Create Nginx Virtual Hosts
+###########################################################
+- name: Create log directory
+  shell: mkdir -p {{ log_dir }}
+
+- name: Delete available default sites
+  shell: rm -f /etc/nginx/sites-available/default
+
+- name: Delete enabled default sites
+  shell: rm -f /etc/nginx/sites-enabled/default
+
+- name: Copy site config
+  template: src="nginx_site" dest="/etc/nginx/sites-available/{{ server_name }}"
+
+- name: Create enable site link
+  shell: ln -sf /etc/nginx/sites-available/{{ server_name }} /etc/nginx/sites-enabled
+
+- name: Copy site config
+  template: src=www.conf dest=/etc/php5/fpm/pool.d/www.conf
+
+- name: Restart Nginx service
+  shell: service nginx restart
+
+- name: Restart php5-fpm service
+  shell: service php5-fpm restart
+
+
+
+
+# Add a User
+###########################################################
+- name: Copy user_add.php
+  template: src=user_add.php dest={{ download_dir }}
+
+- name: Run user_add.php
+  shell: php {{ download_dir }}/user_add.php
+
+
+
+
+# Developer Tools
+###########################################################
+- name: Copy Adminer
+  shell: cp {{ download_dir }}/adminer.php {{ site_root_dir }}
+
+- name: Create phpMyAdmin link
+  shell: ln -sf /usr/share/phpmyadmin/ {{ site_root_dir }}

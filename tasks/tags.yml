@@ -1,0 +1,19 @@
+- { name: "list              - show all useful tags",                                            shell: echo "" }
+- { name: "lap-pkg-update    - update OS packages",                                              shell: echo "" }
+- { name: "lap-download      - download fresh: Yii framework, master and development branch...", shell: echo "" }
+- { name: "lap-install       - create new database",                                             shell: echo "" }
+- { name: "lap-master-update - create and update project from master branch",                    shell: echo "" }
+- { name: "lap-dev-update    - create and update project from development branch",               shell: echo "" }
+
+- { name: "",                                                           shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml",                          shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml --tags list",              shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml --tags lap-pkg-update",    shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml --tags lap-download",      shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml --tags lap-install",       shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml --tags lap-master-update", shell: echo "" }
+- { name: "ansible-playbook -i hosts cfg.yml --tags lap-dev-update",    shell: echo "" }
+
+- { name: "",                                                                          shell: echo "" }
+- { name: 'ansible-playbook -i hosts cfg.yml --tags "lap-download,lap-master-update"', shell: echo "" }
+- { name: 'ansible-playbook -i hosts cfg.yml --tags "lap-download,lap-dev-update"',    shell: echo "" }

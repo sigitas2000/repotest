@@ -1,0 +1,22 @@
+# Change MySQL root password
+###########################################################
+- name: Change database root password
+  include: mysql-pass-change.yml
+
+
+# Import MySQL dumpfile
+###########################################################
+- name: Copy database file
+  copy: src=files/affiliate_2014-09-03.sql.gz dest={{ download_dir }}
+
+- name: Is a database exists?
+  shell: echo "show databases like '{{ db_name }}'" | mysql -u{{ db_user }} -p{{ db_pass }}
+  register: out
+
+- name: Create database
+  shell: echo "create database {{ db_name }}" | mysql -u{{ db_user }} -p{{ db_pass }}
+  when: out.stdout == ""
+
+- name: Import MySQL dumpfile
+  shell: gunzip < {{ db_dump_gz }} | mysql -u{{ db_user }} -p{{ db_pass }} {{ db_name }}
+  when: out.stdout == ""

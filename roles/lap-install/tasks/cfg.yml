@@ -1,0 +1,9 @@
+- name: lap-install
+  hosts: all
+  gather_facts: no
+  sudo: true
+  vars:
+    download_dir : /var/www/lap/src
+    db_dump_gz   : "{{ download_dir }}/affiliate_2014-09-03.sql.gz"
+  roles:
+    - { role: lap-install, tags: ['lap-install'] }

@@ -1,0 +1,32 @@
+- name: all tags
+  hosts: all
+  sudo: true
+  vars:
+    db_user : root
+  vars_prompt:
+    - { name: "db_pass_change", prompt: "Change DB password [y/n]?", private: no, default: n }
+    - { name: "db_pass", prompt: "Enter DB password", private: yes }
+  tasks:
+    - name: Mysql service stop
+      shell: service mysql stop
+      when: db_pass_change == "y" or db_pass_change == "Y"
+    
+    - name: Change Mysql root password
+      shell: echo "update mysql.user set password=password('{{ db_pass }}') where user='{{ db_user }}';\n flush privileges;\n" > /tmp/mysql_reset.sql
+      when: db_pass_change == "y" or db_pass_change == "Y"
+    
+    - name: Mysql service start in safe mode
+      shell: su - mysql -s /bin/bash -c "mysqld_safe --skip-grant-tables --init-file=/tmp/mysql_reset.sql >/dev/null 2>&1 &"
+      when: db_pass_change == "y" or db_pass_change == "Y"
+    
+    - name: Mysql service stop
+      shell: service mysql stop
+      when: db_pass_change == "y" or db_pass_change == "Y"
+    
+    - name: Mysql service start
+      shell: service mysql start
+      when: db_pass_change == "y" or db_pass_change == "Y"
+    
+    - name: Remove temp file
+      shell: rm /tmp/mysql_reset.sql
+      when: db_pass_change == "y" or db_pass_change == "Y"

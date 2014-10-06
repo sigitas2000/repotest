@@ -1,0 +1,7 @@
+db_host : localhost
+db_name : affiliate
+db_user : root
+db_pass : xxxxx
+
+app_user : sigitas
+app_pass : xxxxx

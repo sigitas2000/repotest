@@ -1,0 +1,35 @@
+- name: ensure packages is at the latest version
+  action: apt pkg={{ item }} state=latest update-cache=yes force=yes install_recommends=yes
+  with_items:
+    - zip
+    - mc
+    - git
+    - nginx
+    - php5-fpm
+    - php5-dev
+    - php-pear
+    - php5-curl
+    - php5-mysql
+    - mysql-server
+    - phpmyadmin
+
+- name: Pear channel-discover pear.phing.info
+  shell: pear channel-discover pear.phing.info
+  register: out
+  failed_when: out.rc != 0 and ("already initialized" not in out.stdout)
+
+- name: Install Phing
+  shell: pear upgrade phing/phing
+  register: out
+  failed_when: out.rc != 0 and ("already installed" not in out.stdout)
+
+- name: Install bbcode
+  shell: pecl upgrade bbcode-1.0.3b1
+  register: out
+  failed_when: out.rc != 0 and ("already installed" not in out.stdout)
+
+- name: Create file bbcode.ini
+  shell: echo "extension=bbcode.so" > /etc/php5/mods-available/bbcode.ini
+
+- name: Create link to bbcode
+  shell: ln -sf /etc/php5/mods-available/bbcode.ini /etc/php5/conf.d/20-bbcode.ini
